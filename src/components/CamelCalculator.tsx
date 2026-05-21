@@ -7,7 +7,12 @@ import {
 } from '../types';
 import { 
   CAMEL_BREEDS 
-} from '../../server/calculator';
+} from '../utils/calculator';
+import {
+  getLocalTrades,
+  insertLocalTrade,
+  resetLocalDb
+} from '../utils/localDb';
 import { 
   Car, 
   Heart, 
@@ -70,17 +75,13 @@ export default function CamelCalculator({ quizScore }: CamelCalculatorProps) {
   const [explainPlan, setExplainPlan] = useState<string[]>([]);
   const [historyFilter, setHistoryFilter] = useState<string>('');
 
-  // Auto-fetch history on boot and when filter changes
-  const loadHistory = async (filter = '') => {
+  // Local-fetch history on boot and when filter changes
+  const loadHistory = (filter = '') => {
     try {
-      const url = filter ? `/api/trades?category=${filter}` : '/api/trades';
-      const res = await fetch(url);
-      if (res.ok) {
-        const d = await res.json();
-        setTradeHistory(d.data || []);
-        setSqlUsed(d.sqlUsed || '');
-        setExplainPlan(d.explainPlan || []);
-      }
+      const d = getLocalTrades(filter);
+      setTradeHistory(d.data || []);
+      setSqlUsed(d.sqlUsed || '');
+      setExplainPlan(d.explainPlan || []);
     } catch (err) {
       console.error(err);
     }
@@ -132,33 +133,24 @@ export default function CamelCalculator({ quizScore }: CamelCalculatorProps) {
     };
 
     try {
-      const response = await fetch('/api/trades', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.details || 'Calculation server error');
-      }
-
-      const rawResult = await response.json();
+      // Small simulated latency for calculating (looks better, avoids UI jumpiness)
+      await new Promise(resolve => setTimeout(resolve, 600));
+      const rawResult = insertLocalTrade(payload);
       setResult(rawResult);
       
       // Reload lists
       loadHistory(historyFilter);
     } catch (err: any) {
-      setError(err.message || 'Network error executing trade simulation.');
+      setError(err.message || 'Error executing trade simulation.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleResetHistory = async () => {
+  const handleResetHistory = () => {
     if (!confirm('Are you sure you want to purge the database tables in Postgres?')) return;
     try {
-      await fetch('/api/reset', { method: 'POST' });
+      resetLocalDb();
       setResult(null);
       loadHistory();
     } catch (err) {

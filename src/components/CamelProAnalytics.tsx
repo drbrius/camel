@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { DBStats } from '../types';
+import {
+  getPremiumStatus,
+  setPremiumStatus,
+  getLocalAnalytics
+} from '../utils/localDb';
 import { 
   Sparkles, 
   CheckCircle2, 
@@ -36,14 +41,12 @@ export default function CamelProAnalytics() {
 
   // 1. Fetch current backend premium status on mount
   useEffect(() => {
-    fetch('/api/premium/status')
-      .then(res => res.json())
-      .then(data => {
-        setIsUnlocked(!!data.unlocked);
-      })
-      .catch(err => {
-        console.error('Failed to load initial subscription state:', err);
-      });
+    try {
+      const unlocked = getPremiumStatus();
+      setIsUnlocked(unlocked);
+    } catch (err) {
+      console.error('Failed to load initial subscription state:', err);
+    }
   }, []);
 
   // 2. Fetch statistics dynamically when activated
@@ -51,24 +54,17 @@ export default function CamelProAnalytics() {
     if (isUnlocked) {
       setLoading(true);
       setErrorMessage('');
-      fetch('/api/analytics')
-        .then(res => {
-          if (!res.ok) {
-            throw new Error('Analytics endpoint is locked or currently restricted in database.');
-          }
-          return res.json();
-        })
-        .then(data => {
-          setStats(data);
-          setLoading(false);
-        })
-        .catch(err => {
-          console.error(err);
-          setStats(null);
-          setLoading(false);
-          setIsUnlocked(false);
-          setErrorMessage(err.message);
-        });
+      try {
+        const data = getLocalAnalytics();
+        setStats(data);
+      } catch (err: any) {
+        console.error(err);
+        setStats(null);
+        setIsUnlocked(false);
+        setErrorMessage(err.message || 'Error loading index stats.');
+      } finally {
+        setLoading(false);
+      }
     }
   }, [isUnlocked]);
 
@@ -93,21 +89,9 @@ export default function CamelProAnalytics() {
     }
 
     try {
-      const response = await fetch('/api/premium/unlock', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          method: checkoutMethod,
-          cardNumber: checkoutMethod === 'card' ? cardNumber : 'FREE_TRIAL_TOKEN'
-        })
-      });
-      const data = await response.json();
-      if (data.success) {
-        setIsUnlocked(true);
-        setShowCheckout(false);
-      } else {
-        setErrorMessage(data.error || 'Gateway validation rejected this trial/card execution.');
-      }
+      setPremiumStatus(true);
+      setIsUnlocked(true);
+      setShowCheckout(false);
     } catch {
       setErrorMessage('Communications failure with simulated gateway network.');
     } finally {
@@ -117,9 +101,9 @@ export default function CamelProAnalytics() {
   };
 
   // Lock reports and notify backend to deactivate
-  const handleLockReports = async () => {
+  const handleLockReports = () => {
     try {
-      await fetch('/api/premium/lock', { method: 'POST' });
+      setPremiumStatus(false);
       setIsUnlocked(false);
       setStats(null);
     } catch (err) {

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Terminal, Database, RefreshCw, Layers, Cpu, Code } from 'lucide-react';
+import { getLocalLogs, SQL_SCHEMA } from '../utils/localDb';
 
 interface LogMessage {
   id: string;
@@ -16,14 +17,11 @@ export default function ServerLogger() {
   const [showSchema, setShowSchema] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const fetchLogs = async () => {
+  const fetchLogs = () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/logs');
-      if (res.ok) {
-        const data = await res.json();
-        setLogs(data.logs || []);
-      }
+      const logsList = getLocalLogs();
+      setLogs(logsList);
     } catch (err) {
       console.error('Error fetching logs:', err);
     } finally {
@@ -31,13 +29,9 @@ export default function ServerLogger() {
     }
   };
 
-  const fetchSchema = async () => {
+  const fetchSchema = () => {
     try {
-      const res = await fetch('/api/schema');
-      if (res.ok) {
-        const data = await res.json();
-        setSchemaStr(data.schema || '');
-      }
+      setSchemaStr(SQL_SCHEMA);
     } catch (err) {
       console.error(err);
     }
@@ -46,7 +40,7 @@ export default function ServerLogger() {
   useEffect(() => {
     fetchLogs();
     fetchSchema();
-    const interval = setInterval(fetchLogs, 10000); // Poll every 10s
+    const interval = setInterval(fetchLogs, 4000); // Poll every 4 seconds for immediate trace feedback
     return () => clearInterval(interval);
   }, []);
 

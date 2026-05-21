@@ -18,6 +18,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<'calculator' | 'analytics'>('calculator');
   const [quizScore, setQuizScore] = useState<number>(0);
   const [showTerminal, setShowTerminal] = useState(false);
+  const [logoError, setLogoError] = useState(false);
 
   // Stacks the quiz score into appraisal models
   const handleQuizComplete = (score: number) => {
@@ -36,13 +37,18 @@ export default function App() {
         {/* Navigation Header */}
         <header id="main-app-header" className="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-clay/15 dark:border-sand/15 pb-6">
           <div className="flex items-center gap-4 text-center sm:text-left flex-col sm:flex-row">
-            <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-terracotta shadow-md bg-sand/50 shrink-0">
-              <img 
-                src={logoUrl} 
-                alt="Camel Trade Calculator Logo" 
-                className="w-full h-full object-cover"
-                referrerPolicy="no-referrer"
-              />
+            <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-terracotta shadow-md bg-sand/50 shrink-0 flex items-center justify-center bg-sand/40 dark:bg-clay/30">
+              {!logoError ? (
+                <img 
+                  src={logoUrl} 
+                  alt="Camel Trade Calculator Logo" 
+                  className="w-full h-full object-cover"
+                  referrerPolicy="no-referrer"
+                  onError={() => setLogoError(true)}
+                />
+              ) : (
+                <span className="text-3xl filter select-none">🐪</span>
+              )}
             </div>
             <div>
               <div className="flex items-center justify-center sm:justify-start gap-2">
