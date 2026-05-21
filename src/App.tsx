@@ -2,20 +2,17 @@ import { useState } from 'react';
 import ThemeToggle from './components/ThemeToggle';
 import CamelCalculator from './components/CamelCalculator';
 import CamelQuiz from './components/CamelQuiz';
-import CamelProAnalytics from './components/CamelProAnalytics';
 import ServerLogger from './components/ServerLogger';
 import { 
   Sparkles, 
   Database, 
   Award, 
   Calculator, 
-  Terminal, 
-  Layers 
+  Terminal 
 } from 'lucide-react';
 import logoUrl from './assets/images/camel_logo_1779352656823.png';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'calculator' | 'analytics'>('calculator');
   const [quizScore, setQuizScore] = useState<number>(0);
   const [showTerminal, setShowTerminal] = useState(false);
   const [logoError, setLogoError] = useState(false);
@@ -71,95 +68,51 @@ export default function App() {
           </div>
         </header>
 
-        {/* Tab Selection Navigation */}
-        <nav id="view-mode-tabs" className="flex border-b border-clay/10 dark:border-sand/10 pb-px gap-1 overflow-x-auto">
-          <button
-            id="tab-calculator-btn"
-            type="button"
-            onClick={() => setActiveTab('calculator')}
-            className={`px-4 py-2.5 rounded-t-xl text-xs font-bold tracking-widest uppercase transition-all flex items-center gap-2 cursor-pointer border-b-2 -mb-px ${
-              activeTab === 'calculator'
-                ? 'border-terracotta text-terracotta dark:text-terracotta bg-terracotta/5 font-extrabold'
-                : 'border-transparent text-clay/60 hover:text-clay dark:text-sand/60 dark:hover:text-sand'
-            }`}
-          >
-            <Calculator size={13} />
-            <span>Appraisal Station</span>
-          </button>
-          
-          <button
-            id="tab-analytics-btn"
-            type="button"
-            onClick={() => setActiveTab('analytics')}
-            className={`px-4 py-2.5 rounded-t-xl text-xs font-bold tracking-widest uppercase transition-all flex items-center gap-2 cursor-pointer border-b-2 -mb-px ${
-              activeTab === 'analytics'
-                ? 'border-terracotta text-terracotta dark:text-terracotta bg-terracotta/5 font-extrabold'
-                : 'border-transparent text-clay/60 hover:text-clay dark:text-sand/60 dark:hover:text-sand'
-            }`}
-          >
-            <Layers size={13} />
-            <span>Pro Analytics</span>
-            <span className="text-[8px] bg-terracotta text-white rounded px-1.5 py-0.2 ml-0.5 uppercase tracking-widest">PRO</span>
-          </button>
-
-
-        </nav>
-
         {/* Dynamic Views Viewport */}
         <main className="min-h-[30rem]">
-          {activeTab === 'calculator' && (
-            <div className="space-y-8 animate-fade-in">
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
-                {/* Introduction guidelines banner */}
-                <div className="md:col-span-12 p-4 rounded-xl bg-gradient-to-r from-terracotta/10 via-olive/5 to-transparent border border-terracotta/20 flex items-center gap-3">
-                  <div className="p-2 bg-terracotta/10 dark:bg-terracotta/20 rounded-lg text-terracotta border border-terracotta/30 shrink-0">
-                    <Award size={18} />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-clay dark:text-sand">
-                      Desert Survival Score multiplier: <span className="text-terracotta">{quizScore}% bonus</span>
-                    </h4>
-                    <p className="text-[11px] text-clay/70 dark:text-sand/65 mt-0.5">
-                      Completed quizzes reward multipliers on top of standard dromedary market ratios. Fill out the quiz below to upgrade your assets pricing!
-                    </p>
-                  </div>
+          <div className="space-y-8 animate-fade-in">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+              {/* Introduction guidelines banner */}
+              <div className="md:col-span-12 p-4 rounded-xl bg-gradient-to-r from-terracotta/10 via-olive/5 to-transparent border border-terracotta/20 flex items-center gap-3">
+                <div className="p-2 bg-terracotta/10 dark:bg-terracotta/20 rounded-lg text-terracotta border border-terracotta/30 shrink-0">
+                  <Award size={18} />
                 </div>
-              </div>
-
-              {/* Calculator View layout */}
-              <CamelCalculator quizScore={quizScore} />
-
-              {/* Quiz Module Row */}
-              <div className="pt-4 grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-                <CamelQuiz onQuizComplete={handleQuizComplete} savedScore={quizScore > 0 ? quizScore : undefined} />
-                <div className="border border-dashed border-clay/20 dark:border-sand/20 bg-sand/40 dark:bg-white/5 rounded-2xl p-6 text-xs space-y-3">
-                  <h4 className="font-semibold text-clay dark:text-sand flex items-center gap-1.5 uppercase font-mono tracking-wider text-[11px]">
-                    <Sparkles size={13} className="text-terracotta" />
-                    <span>How Camel Appraisal Works</span>
+                <div>
+                  <h4 className="text-xs font-bold text-clay dark:text-sand">
+                    Desert Survival Score multiplier: <span className="text-terracotta">{quizScore}% bonus</span>
                   </h4>
-                  <p className="text-clay/80 dark:text-sand/80 leading-relaxed font-sans">
-                    Camel values undergo double-multiplier computations:
-                  </p>
-                  <ul className="space-y-1.5 text-clay/60 dark:text-sand/60 list-disc list-inside">
-                    <li><strong className="text-clay dark:text-sand">Form appraisals:</strong> Custom parameters (cooking skill of wives, height of husbands, horsepower of cars, digital storage tiers of smartphones) scale appraisal values.</li>
-                    <li><strong className="text-clay dark:text-sand">Worthiness Quiz:</strong> Demonstrating desert wisdom grants score boosts up to <strong className="text-terracotta">+10 camels</strong>.</li>
-                    <li><strong className="text-clay dark:text-sand">Genetic breed indices:</strong> Different camel breeds carry unique multipliers from 1.0x to 2.2x.</li>
-                  </ul>
-                  <p className="text-[10px] italic text-clay/50 dark:text-sand/40 leading-normal">
-                    ⚠️ The app is optimized for humor and high-fidelity testing. Actual caravan experiences in the Sahara might vary. All records are maintained inside the simulated PostgreSQL cluster.
+                  <p className="text-[11px] text-clay/70 dark:text-sand/65 mt-0.5">
+                    Completed quizzes reward multipliers on top of standard dromedary market ratios. Fill out the quiz below to upgrade your assets pricing!
                   </p>
                 </div>
               </div>
             </div>
-          )}
 
-          {activeTab === 'analytics' && (
-            <div className="animate-fade-in">
-              <CamelProAnalytics />
+            {/* Calculator View layout */}
+            <CamelCalculator quizScore={quizScore} />
+
+            {/* Quiz Module Row */}
+            <div className="pt-4 grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+              <CamelQuiz onQuizComplete={handleQuizComplete} savedScore={quizScore > 0 ? quizScore : undefined} />
+              <div className="border border-dashed border-clay/20 dark:border-sand/20 bg-sand/40 dark:bg-white/5 rounded-2xl p-6 text-xs space-y-3">
+                <h4 className="font-semibold text-clay dark:text-sand flex items-center gap-1.5 uppercase font-mono tracking-wider text-[11px]">
+                  <Sparkles size={13} className="text-terracotta" />
+                  <span>How Camel Appraisal Works</span>
+                </h4>
+                <p className="text-clay/80 dark:text-sand/80 leading-relaxed font-sans">
+                  Camel values undergo double-multiplier computations:
+                </p>
+                <ul className="space-y-1.5 text-clay/60 dark:text-sand/60 list-disc list-inside">
+                  <li><strong className="text-clay dark:text-sand">Form appraisals:</strong> Custom parameters (cooking skill of wives, height of husbands, horsepower of cars, digital storage tiers of smartphones) scale appraisal values.</li>
+                  <li><strong className="text-clay dark:text-sand">Worthiness Quiz:</strong> Demonstrating desert wisdom grants score boosts up to <strong className="text-terracotta">+10 camels</strong>.</li>
+                  <li><strong className="text-clay dark:text-sand">Genetic breed indices:</strong> Different camel breeds carry unique multipliers from 1.0x to 2.2x.</li>
+                </ul>
+                <p className="text-[10px] italic text-clay/50 dark:text-sand/40 leading-normal">
+                  ⚠️ The app is optimized for humor and high-fidelity testing. Actual caravan experiences in the Sahara might vary. All records are maintained inside the simulated PostgreSQL cluster.
+                </p>
+              </div>
             </div>
-          )}
-
-
+          </div>
         </main>
 
         {/* Collapsible live telemetry trace footer logs */}
