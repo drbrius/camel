@@ -1,0 +1,82 @@
+name: Continuous Integration & Automated Cloud Deployment
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  validate-and-test:
+    name: Code Quality and Tests
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code Repository
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js Environment
+      uses: actions/setup-node@v4
+      with:
+        node-size: '20'
+        cache: 'npm'
+
+    - name: Install Development Dependencies
+      run: npm ci
+
+    - name: Static Syntax Verification (Lint)
+      run: npm run lint
+
+    - name: Run Backend API Integrity Suite
+      run: npm run test
+
+    - name: Test Compiling Production Artifacts
+      run: npm run build
+
+  build-and-deploy:
+    name: Production Deployment to Cloud Run
+    needs: validate-and-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+
+    steps:
+    - name: Checkout Code Repository
+      uses: actions/checkout@v4
+
+    # The following steps handle containerizing and shipping the fullstack application
+    - name: Authenticate with Google Cloud
+      id: auth
+      uses: google-github-actions/auth@v2
+      with:
+        token_format: 'access_token'
+        # Credentials below can be loaded automatically from GitHub Actions repository Secrets
+        credentials_json: '${{ secrets.GCP_SA_KEY_JSON }}'
+
+    - name: Set up Cloud SDK Config
+      uses: google-github-actions/setup-gcloud@v2
+
+    - name: Configure Gcloud Auth to Artifact Registry
+      run: |
+        gcloud auth configure-docker europe-west2-docker.pkg.dev --quiet
+
+    - name: Assemble Docker Build Container
+      run: |
+        docker build -t europe-west2-docker.pkg.dev/company-prod/camel-app/calculator-service:${{ github.sha }} .
+
+    - name: Deliver Container Image to Artifact Registry
+      run: |
+        docker push europe-west2-docker.pkg.dev/company-prod/camel-app/calculator-service:${{ github.sha }}
+
+    - name: Trigger Service Rollout to Cloud Run
+      run: |
+        gcloud run deploy camel-trade-calculator \
+          --image=europe-west2-docker.pkg.dev/company-prod/camel-app/calculator-service:${{ github.sha }} \
+          --region=europe-west2 \
+          --platform=managed \
+          --allow-unauthenticated \
+          --port=3000 \
+          --set-env-vars="NODE_ENV=production,GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}"

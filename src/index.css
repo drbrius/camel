@@ -1,0 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Inter:wght@300;400;550;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-sand: #F5F2ED;
+  --color-clay: #2C2420;
+  --color-terracotta: #C05621;
+  --color-olive: #5A5A40;
+  --color-warm-black: #1A1614;
+  
+  --font-serif: "Cormorant Garamond", serif;
+  --font-sans: "Inter", sans-serif;
+}
+
+/* Base custom classes to match the design theme elegant curves, frames, and materials */
+.serif {
+  font-family: 'Cormorant Garamond', serif;
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(245, 242, 237, 0.1);
+  border-radius: 32px;
+}
+
+.btn-primary {
+  background: #C05621;
+  color: #F5F2ED;
+  border-radius: 9999px;
+  font-weight: 550;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+  transform: translateY(-0.5px);
+}
+
+.input-field {
+  background: rgba(44, 36, 32, 0.04);
+  border: 1px solid rgba(44, 36, 32, 0.15);
+  border-radius: 16px;
+  color: #2C2420;
+  transition: all 0.2s;
+}
+
+.dark .input-field {
+  background: rgba(245, 242, 237, 0.05);
+  border: 1px solid rgba(245, 242, 237, 0.2);
+  color: #F5F2ED;
+}

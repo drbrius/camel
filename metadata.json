@@ -1,0 +1,6 @@
+{
+  "name": "Camel Trade Calculator",
+  "description": "Calculate how many camels you could trade your assets, partners, or car for with different camel breeds, interactive quizzes, and advanced analytics.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
