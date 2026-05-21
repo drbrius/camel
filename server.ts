@@ -101,6 +101,10 @@ async function startServer() {
   // 5. Query cluster metrics
   app.get('/api/analytics', async (req, res) => {
     try {
+      if (!DBManager.getPremiumStatus()) {
+        DBManager.logDirectly('WARN', `Attempt to access Pro Analytics while subscription is inactive (premiumUnlocked = false)`);
+        return res.status(403).json({ error: 'Locked', details: 'Pro analytics features are locked in the backend database.' });
+      }
       // Simulate real index calculations
       const stats = await DBManager.getStats();
       res.json(stats);
@@ -108,6 +112,40 @@ async function startServer() {
       DBManager.logDirectly('ERROR', `Analytics pipeline crash: ${err.message}`);
       res.status(500).json({ error: 'Failed to fetch cluster stats', details: err.message });
     }
+  });
+
+  // 5b. Premium subscription management (Simulated Gateway Gateway endpoints)
+  app.get('/api/premium/status', (req, res) => {
+    const unlocked = DBManager.getPremiumStatus();
+    res.json({ unlocked });
+  });
+
+  app.post('/api/premium/unlock', async (req, res) => {
+    try {
+      const { cardNumber, method } = req.body || {};
+      DBManager.logDirectly('INFO', `GATEWAY: Initiating tokenized transaction handshake via automated sandbox gateway`);
+      
+      // Simulate gateway processing delay
+      await new Promise(resolve => setTimeout(resolve, 600));
+
+      const txId = `tx_${Math.random().toString(36).substring(2, 10)}`;
+      DBManager.logDirectly('INFO', `GATEWAY: Simulated ${method === 'card' ? 'Stripe Checkout' : 'Free Trial Provisioner'} matched token ${txId}`);
+      DBManager.logDirectly('QUERY', `UPDATE system_subscriptions SET level = 'PRO', gateway_token = '${txId}' WHERE user_id = 'current_user';`);
+      
+      DBManager.setPremiumStatus(true);
+      DBManager.logDirectly('INFO', `SYSTEM: Successfully committed premium license unlock to disk store`);
+      
+      res.json({ success: true, message: 'Premium license successfully activated!', transactionId: txId });
+    } catch (err: any) {
+      DBManager.logDirectly('ERROR', `Gateway transaction failure: ${err.message}`);
+      res.status(500).json({ error: 'Internal Server Error', details: err.message });
+    }
+  });
+
+  app.post('/api/premium/lock', (req, res) => {
+    DBManager.setPremiumStatus(false);
+    DBManager.logDirectly('WARN', `SYSTEM: Premium active subscription set to inactive (locked manually)`);
+    res.json({ success: true });
   });
 
   // 6. Output live logs

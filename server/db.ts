@@ -106,6 +106,27 @@ function appendSystemLog(level: 'INFO' | 'WARN' | 'ERROR' | 'QUERY', message: st
 }
 
 export class DBManager {
+  // Premium subscription state accessors
+  static getPremiumStatus(): boolean {
+    try {
+      if (!fs.existsSync(DB_FILE)) return false;
+      const dbData = JSON.parse(fs.readFileSync(DB_FILE, 'utf-8'));
+      return !!dbData.premiumUnlocked;
+    } catch {
+      return false;
+    }
+  }
+
+  static setPremiumStatus(status: boolean): void {
+    try {
+      const dbData = JSON.parse(fs.readFileSync(DB_FILE, 'utf-8'));
+      dbData.premiumUnlocked = status;
+      fs.writeFileSync(DB_FILE, JSON.stringify(dbData, null, 2));
+    } catch (err) {
+      console.error('Failed to write premium status:', err);
+    }
+  }
+
   // DB query implementation with telemetry audit logs
   static async query<T>(sql: string, params: any[] = []): Promise<{ rows: T[]; explain: string[] }> {
     queryCount++;
@@ -255,7 +276,7 @@ export class DBManager {
   }
 
   // Write custom log line from routes
-  static logDirectly(level: 'INFO' | 'WARN' | 'ERROR', message: string, duration?: number) {
+  static logDirectly(level: 'INFO' | 'WARN' | 'ERROR' | 'QUERY', message: string, duration?: number) {
     appendSystemLog(level, message, duration);
   }
 }
