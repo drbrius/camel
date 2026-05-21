@@ -1,6 +1,5 @@
 import express from 'express';
 import path from 'path';
-import { createServer as createViteServer } from 'vite';
 import { DBManager, POSTGRES_SCHEMA } from './server/db';
 import { calculateCamels } from './server/calculator';
 import { TradeCalculationInput } from './src/types';
@@ -206,6 +205,7 @@ async function startServer() {
 
   // Interactive UI Client Asset router mount
   if (process.env.NODE_ENV !== 'production') {
+    const { createServer: createViteServer } = await (0, eval)('import("vite")');
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa',

@@ -12,7 +12,7 @@ import {
   Terminal, 
   Layers 
 } from 'lucide-react';
-const logoUrl = '/src/assets/images/camel_logo_1779352656823.png';
+import logoUrl from './assets/images/camel_logo_1779352656823.png';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<'calculator' | 'analytics'>('calculator');
