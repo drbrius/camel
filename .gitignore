@@ -1,6 +1,9 @@
 node_modules/
 build/
 dist/
+# Runtime state: trade journal, risk state and bot logs. Never commit these –
+# a stale state.json restored onto a live account resets the daily loss budget.
+data/
 coverage/
 .DS_Store
 *.log

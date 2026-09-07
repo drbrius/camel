@@ -7,7 +7,10 @@
     "dev": "tsx server.ts",
     "build": "vite build && esbuild server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",
     "start": "node dist/server.cjs",
-    "test": "tsx server/test-runner.ts",
+    "test": "tsx server/test-runner.ts && tsx bot/tests.ts",
+    "bot": "tsx bot/run.ts",
+    "bot:test": "tsx bot/tests.ts",
+    "bot:backtest": "tsx bot/backtest/run.ts",
     "clean": "rm -rf dist server.js data/*.json data/*.log",
     "lint": "tsc --noEmit"
   },
